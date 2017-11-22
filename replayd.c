@@ -76,6 +76,22 @@ netsnmp_variable_list *parse_reply(char *name) {
         oid_str = strsep(&value, " ");
         strsep(&value, " "); // Skip '='
         type_str = strsep(&value, ":");
+
+        switch (ra_type_atoi(type_str))
+        {
+            case ASN_INTEGER:
+            case ASN_TIMETICKS:
+            case ASN_GAUGE:
+            case ASN_COUNTER:
+            case ASN_IPADDRESS:
+            case ASN_OCTET_STR:
+            case ASN_OBJECT_ID:
+                break;
+            default:
+                printf("Unrecognised '%s'\n", type_str);
+                continue;
+        }
+
         if (value) {
             value++;
         }
@@ -103,6 +119,7 @@ netsnmp_variable_list *parse_reply(char *name) {
             case ASN_TIMETICKS:
             case ASN_GAUGE:
             case ASN_COUNTER:
+            case ASN_IPADDRESS:
                 lptr->val.integer = malloc(sizeof(long));
                 if (strchr(value, (int)'(')) {
                     value = strchr(value, (int)'(');
@@ -146,6 +163,7 @@ netsnmp_variable_list *parse_reply(char *name) {
 
     }
 
+    free(line);
     return list;
 }
 
